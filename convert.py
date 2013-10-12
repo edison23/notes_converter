@@ -150,7 +150,7 @@ def copy_dirs(from_dir, to_dir, subdir):
 	if os.path.exists(from_dir):
 		if os.name == "posix":
 			os.system("cp -rf " + from_dir + "/" + subdir + " " + to_dir)
-			print red + "Files in '" + from_dir + "/" + subdir + "' copied." + reset
+			print red + "\tFiles in '" + from_dir + "/" + subdir + "' copied." + reset
 			return True
 		elif os.name == "nt":
 			os.system("xcopy " + from_dir.replace("/", "\\") + "\\" + subdir + " " + to_dir.replace("/", "\\") + "\\" + subdir + " /s /q /y")
@@ -164,7 +164,7 @@ def copy_dirs(from_dir, to_dir, subdir):
 def copy_files(path="", cp_styles=False):
 	if cp_styles == True:
 		print "Copying styles..."
-		if copy_dirs("./", path, ".styles"):
+		if copy_dirs(".", path, ".styles"):
 			print "Done."
 		else:
 			print "Failed."
@@ -232,9 +232,10 @@ args=parser.parse_args()
 path = config.path
 out_path = config.out_path
 
+file_ops(path)
+
 if args.nostyle == False and not args.filename:
 	copy_files(out_path, cp_styles=True)
+	print "\nInput directory: " + path + " | Output directory: " + out_path + "\n\033[92mAll files processed.\033[0m"
 
-file_ops(path)
-print "Input directory: " + path + " | Output directory: " + out_path
 
