@@ -69,7 +69,7 @@ def blok_tag(line):
 	if "table" in tags:
 		line = re.sub(r"^(.)", r"<tr><td>\1", line)
 		line = line.replace("\t", "</td><td>")
-		line = re.sub(r"(.)$", r"\1</td></tr>", line)
+		line = re.sub(r"$", r"</td></tr>", line)
 		return line
 	else:
 		return cgi.escape(line)
@@ -120,6 +120,8 @@ def bullets(line):
 	return line
 
 def convert(line):
+	if args.print_orig == True:
+			print "\033[94m", line,
 	# blok tags, opening, closing
 	if re.match(r"^<\?[a-z]$", line) or re.match(r"^\?>$", line):
 		line = blok_tag(line)
@@ -151,6 +153,8 @@ def convert(line):
 		line = inline_format(line)
 		# character replacing
 		line = char_replace(line)
+	if args.print_conv == True:
+			print "\033[96m", line,
 	return line
 
 
@@ -206,9 +210,10 @@ def write_file(path="", out_path="", single=False, cp_styles=False):
 	for line in f_in:
 		f_out.write(convert(line.rstrip()+"\n"))	# pridat konce radku
 
+	print "\033[0m",
+	
 	last_update = '<div id="last_update">\n\tLast update: ' + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ' UTC\n</div>'
 	f_out.write(open(config.footer).read().replace("last_update", last_update))
-	# f_out.write()	# prasarna (za koncem <html>)
 	print "PROCESSED:", fname, "->", new_name
 
 def file_ops(path):
@@ -236,6 +241,8 @@ parser=argparse.ArgumentParser(
     epilog="For complete documentation see http://edison23.net/bleh/specification.html.")
 parser.add_argument('-n', '--nostyle', action='store_true', help='disables copying of style.css and fonts; useful for updating existing document')
 parser.add_argument('-s', '--single', action='store', dest="filename", help='process a single file')
+parser.add_argument('-p', '--print_orig', action='store_true', help='print original lines of the processed file(s) to standard output - use with care when in batch mode!')
+parser.add_argument('-q', '--print_conv', action='store_true', help='print converted lines of the processed file(s) to standard output - use with care when in batch mode!')
 parser.add_argument('-v', '--version', action='version', version='%(prog)s 3.1')
 args=parser.parse_args()
 
