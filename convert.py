@@ -58,10 +58,18 @@ def blok_tag(line):
 	if re.match(r"^<\?b$", line):
 		tags.extend(["b"])
 		return re.sub("\n<\?b", "<b>", line)
+	if re.match(r"^<\?t$", line):
+		tags.extend(["table"])
+		return re.sub("<\?t", "\n<table>", line)
 	if re.match(r"^\?>$", line):
 		dont_process -= 1
 		line = re.sub("\?>", "</" + tags[(len(tags)-1)] + ">\n", line)
 		tags.remove(tags[(len(tags)-1)])	# delete the closed tag from list
+		return line
+	if "table" in tags:
+		line = re.sub(r"^(.)", r"<tr><td>\1", line)
+		line = line.replace("\t", "</td><td>")
+		line = re.sub(r"(.)$", r"\1</td></tr>", line)
 		return line
 	else:
 		return cgi.escape(line)
@@ -132,6 +140,8 @@ def convert(line):
 			line = dividers(line)
 		elif "$img" in line:
 			line = images(line)
+		elif "table" in tags:
+			line = blok_tag(line)
 		else:
 			line = add_br(line)
 
