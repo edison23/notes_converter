@@ -30,12 +30,14 @@ def code(line):
 	return line
 
 def inline_format(line):
-	line = re.sub(r'((https?://|www)[-\w./#?%=&]+)', r'<a href="\1">\1</a>', line) # r'(?<!"|>)((https?://|www)[-\w./#?%=&]+)'
+	line = re.sub(r'((https?://|www)[-\w./#?%=&]+)', r'<a href="\1">\1</a>', line)	# links - if there was a link on the line, not futher processing is performed
 	if "<a href=" not in line:
-		line = re.sub(r"\^_(.*?)_", r"<i>\1</i>", line)
-		line = re.sub(r"\^\*(.*?)\*", r"<b>\1</b>", line)
-		line = re.sub(r"\^,(.*?),", r"<sub>\1</sub>", line)
-		line = re.sub(r"\^`(.*?)`", r"<sup>\1</sup>", line)
+		line = re.sub(r"\^_(.*?)[_|\n]", r"<i>\1</i>", line)	# inline tags end either with closing tag or the end of line
+		line = re.sub(r"\^\*(.*?)[\*|\n]", r"<b>\1</b>", line)
+		line = re.sub(r"\^,(.*?)[,|\n]", r"<sub>\1</sub>", line)
+		line = re.sub(r"\^`(.*?)[`|\n]", r"<sup>\1</sup>", line)
+		line = re.sub(r"\^/(.*?)[/|\n]", r"<u>\1</u>", line)
+		line = re.sub(r"%(\w+)%(.*?)[%|\n]", r'<font color="\1">\2</font>', line)	# accepts only named colors
 	return line
 
 def images(line):
@@ -50,18 +52,18 @@ def char_replace(line):
 def blok_tag(line):
 	global dont_process, tags
 	# code
-	if re.match(r"^<\?c$", line):
+	if re.match(r"^<\?c$", line):	# code. no regex needed here
 		dont_process += 1
 		tags.extend(["pre"])
 		return re.sub("<\?c", "\n<pre>", line)
 	# bold, just for testing
-	if re.match(r"^<\?b$", line):
+	if re.match(r"^<\?b$", line):	# bold. no regex needed here
 		tags.extend(["b"])
 		return re.sub("\n<\?b", "<b>", line)
 	if re.match(r"^<\?t$", line):
 		tags.extend(["table"])
 		return re.sub("<\?t", "\n<table>", line)
-	if re.match(r"^\?>$", line):
+	if re.match(r"^\?>$", line):	# closing tag. no regex needed here
 		dont_process -= 1
 		line = re.sub("\?>", "</" + tags[(len(tags)-1)] + ">\n", line)
 		tags.remove(tags[(len(tags)-1)])	# delete the closed tag from list
@@ -72,11 +74,11 @@ def blok_tag(line):
 		line = re.sub(r"$", r"</td></tr>", line)
 		return line
 	else:
-		return cgi.escape(line)
+		return cgi.escape(line)	# cgi.escape() escapes to html characters, so the code can contain stuff like <, >, etc.
 
 def add_br(line):
 	if line == "\n":
-		return ""
+		return ""	# ignoring blank lines
 	elif line == "|\n":
 		return "<br>\n"
 	else:
@@ -120,6 +122,7 @@ def bullets(line):
 	return line
 
 def convert(line):
+	global rows
 	if args.print_orig == True:
 			print "\033[94m", line,
 	# blok tags, opening, closing
@@ -210,7 +213,7 @@ def write_file(path="", out_path="", single=False, cp_styles=False):
 	for line in f_in:
 		f_out.write(convert(line.rstrip()+"\n"))	# pridat konce radku
 
-	print "\033[0m",
+	print "\033[0m",	# reset the colors (which are in effect with parameters causing stdout print of files)
 	
 	last_update = '<div id="last_update">\n\tLast update: ' + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ' UTC\n</div>'
 	f_out.write(open(config.footer).read().replace("last_update", last_update))

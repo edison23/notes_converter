@@ -108,11 +108,15 @@ ul {
 	list-style-type: square;
 	padding-left: 20px;
 }
-ul ul {
+ul ul, ol ol {
 	padding-left: 30px;
 }
 
-
+ol {
+	margin: 0 0 10px 0;
+	list-style-type: decimal;
+	padding-left: 20px;
+}
 
 pre {
 	font-family: 'Ubuntu Mono';
@@ -127,4 +131,13 @@ code {
 	background-color: #eee;
 	border: 1px solid #aaa;
 	border-radius: 2px;
+}
+
+.note {
+	color: #343434;
+	border-left: 3px solid #999;
+	padding-left: 10px;
+	margin-left: 5px;
+	line-height: 12px;
+	font-size: 12px;
 }
